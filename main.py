@@ -14,7 +14,14 @@ def window_setup(names) -> list:
         [sg.FileBrowse(target="-FILE_BF-")],
     ]
 
-    image_viewer_stain = [[sg.Text("Stain")], [sg.Image(key="-IMAGE_DYE-")]]
+    image_viewer_stain = [
+        [sg.Text("Stain")],
+        [sg.Image(key="-IMAGE_DYE-")],
+        [
+            sg.Radio("PI", "Radio", size=(10, 2), key="-PI-", default=True),
+            sg.Radio("DAPI", "Radio", size=(10, 2), key="-DAPI-"),
+        ],
+    ]
 
     layout = [
         [
@@ -23,9 +30,13 @@ def window_setup(names) -> list:
             sg.Button("Convert"),
             sg.Column(image_viewer_stain),
         ],
-        [sg.Radio("Binary Masks", "Radio", size=(10, 2), key="-MASK-")],
-        [sg.Radio("Ternary Masks", "Radio", size=(10, 2), key="-MASK3-")],
-        [sg.Radio("Continuous", "Radio", size=(10, 2), key="-CONTINUOUS-")],
+        [
+            sg.Radio("Binary Masks", "Radio", size=(10, 2), key="-MASK-"),
+            sg.Radio("Ternary Masks", "Radio", size=(10, 2), key="-MASK3-"),
+            sg.Radio(
+                "Continuous", "Radio", size=(10, 2), key="-CONTINUOUS-", default=True
+            ),
+        ],
         [sg.Combo(names, enable_events=True, key="-METHOD-")],
     ]
 
@@ -39,7 +50,9 @@ def main() -> None:
     window = sg.Window("Necrosis Detector", layout)
 
     while True:
+
         event, values = window.read(timeout=20)
+
         if event == sg.WIN_CLOSED:
             break
 
@@ -79,6 +92,15 @@ def main() -> None:
 
                 dye_btyes = cv2.imencode(".png", dye)[1].tobytes()
                 window["-IMAGE_DYE-"].update(data=dye_btyes)
+
+            elif values["-MASK3-"]:
+                pass
+
+            elif values["-CONTINUOUS-"]:
+                pass
+
+            else:
+                pass
 
 
 if __name__ == "__main__":
