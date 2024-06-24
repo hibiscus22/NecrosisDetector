@@ -18,8 +18,8 @@ def window_setup(names) -> list:
         [sg.Text("Stain")],
         [sg.Image(key="-IMAGE_DYE-")],
         [
-            sg.Radio("PI", "Radio", size=(10, 2), key="-PI-", default=True),
-            sg.Radio("DAPI", "Radio", size=(10, 2), key="-DAPI-"),
+            sg.Radio("PI", "Dye", size=(10, 2), key="-PI-", default=True),
+            sg.Radio("DAPI", "Dye", size=(10, 2), key="-DAPI-"),
         ],
     ]
 
@@ -31,10 +31,10 @@ def window_setup(names) -> list:
             sg.Column(image_viewer_stain),
         ],
         [
-            sg.Radio("Binary Masks", "Radio", size=(10, 2), key="-MASK-"),
-            sg.Radio("Ternary Masks", "Radio", size=(10, 2), key="-MASK3-"),
+            sg.Radio("Binary Masks", "Solution", size=(10, 2), key="-MASK-"),
+            sg.Radio("Ternary Masks", "Solution", size=(10, 2), key="-MASK3-"),
             sg.Radio(
-                "Continuous", "Radio", size=(10, 2), key="-CONTINUOUS-", default=True
+                "Continuous", "Solution", size=(10, 2), key="-CONTINUOUS-", default=True
             ),
         ],
         [sg.Combo(names, enable_events=True, key="-METHOD-")],
