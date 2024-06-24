@@ -22,6 +22,8 @@ def window_setup(names) -> list:
             sg.Radio("PI", "Dye", size=(10, 2), key="-PI-", default=True),
             sg.Radio("DAPI", "Dye", size=(10, 2), key="-DAPI-"),
         ],
+        [sg.Input(key="-FILE_DYE-", enable_events=True, visible=False)],
+        [sg.FileSaveAs(target="-FILE_DYE-", file_types=(("PNG", "*.png"),))],
     ]
 
     layout = [
@@ -75,7 +77,7 @@ def main() -> None:
 
         window["-METHOD-"].update(values=names_combo, value=values["-METHOD-"])
 
-        if event == "-FILE_BF-":
+        if event == "-FILE_BF-":  # Open
             file_path = values["-FILE_BF-"]
             # Read with OpenCV
             brightfield = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
@@ -84,13 +86,20 @@ def main() -> None:
             brightfield_bytes = cv2.imencode(".png", brightfield)[1].tobytes()
             window["-IMAGE_BF-"].update(data=brightfield_bytes)
 
+        if event == "-FILE_DYE-":  # Save
+            file_path = values["-FILE_DYE-"]
+            print(file_path)
+            cv2.imwrite(file_path, dye)
+
         if event == "Convert":
             if values["-MASK-"]:
                 # Get and apply the function
                 method = dict_methods[values["-METHOD-"]]
                 dye = method(brightfield)
 
-                dye_btyes = cv2.imencode(".png", dye)[1].tobytes()
+                dye_btyes = cv2.imencode(".png", dye)[
+                    1
+                ].tobytes()  # png for pysimplegui
                 window["-IMAGE_DYE-"].update(data=dye_btyes)
 
             elif values["-MASK3-"]:
