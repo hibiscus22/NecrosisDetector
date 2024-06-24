@@ -8,6 +8,7 @@ def main() -> None:
     image_viewer_brightfield = [
         [sg.Text("Brightfield")],
         [sg.Image(key="-IMAGE_BF-")],
+        # Dummy Input field to create an event when browsing
         [sg.Input(key="-FILE_BF-", enable_events=True, visible=False)],
         [sg.FileBrowse(target="-FILE_BF-")],
     ]
@@ -28,18 +29,27 @@ def main() -> None:
     window = sg.Window("Necrosis Detector", layout)
 
     while True:
-        event, values = window.read()
+        event, values = window.read(timeout=20)
         if event == sg.WIN_CLOSED:
             break
 
         if event == "-FILE_BF-":
             file_path = values["-FILE_BF-"]
-            print(file_path)
-            image = cv2.imread(file_path)
-            image = cv2.resize(image, (256, 256))
+            # Read with OpenCV
+            brightfield = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+            brightfield = cv2.resize(brightfield, (256, 256))
+            # Display
+            brightfield_bytes = cv2.imencode(".png", brightfield)[1].tobytes()
+            window["-IMAGE_BF-"].update(data=brightfield_bytes)
 
-            img_bytes = cv2.imencode(".png", image)[1].tobytes()
-            window["-IMAGE_BF-"].update(data=img_bytes)
+        if values["-MASK-"]:
+            # Apply method to estimate the dye image
+            _, dye = cv2.threshold(
+                brightfield, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
+            )
+
+            dye_btyes = cv2.imencode(".png", dye)[1].tobytes()
+            window["-IMAGE_DYE-"].update(data=dye_btyes)
 
 
 if __name__ == "__main__":
