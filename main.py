@@ -3,7 +3,8 @@ import cv2
 import numpy as np
 
 
-def main() -> None:
+def window_setup(names) -> list:
+    sg.theme("TanBlue")
 
     image_viewer_brightfield = [
         [sg.Text("Brightfield")],
@@ -18,20 +19,47 @@ def main() -> None:
     layout = [
         [
             sg.Column(image_viewer_brightfield),
-            sg.VSeparator(),
+            # sg.VSeparator(),
+            sg.Button("Convert"),
             sg.Column(image_viewer_stain),
         ],
         [sg.Radio("Binary Masks", "Radio", size=(10, 2), key="-MASK-")],
         [sg.Radio("Ternary Masks", "Radio", size=(10, 2), key="-MASK3-")],
         [sg.Radio("Continuous", "Radio", size=(10, 2), key="-CONTINUOUS-")],
+        [sg.Combo(names, enable_events=True, key="-METHOD-")],
     ]
 
+    return layout
+
+
+def main() -> None:
+    names_combo = ["Select an option..."]
+
+    layout = window_setup(names_combo)
     window = sg.Window("Necrosis Detector", layout)
 
     while True:
         event, values = window.read(timeout=20)
         if event == sg.WIN_CLOSED:
             break
+
+        if values["-MASK-"]:
+            names_combo = [
+                "Otsu",
+                "Watershed",
+                "Watershed + KMeans",
+                "Logistic Regression",
+                "Decission Tree",
+                "UNet",
+            ]
+
+        if values["-MASK3-"]:
+            names_combo = ["Logistic Regression", "Decision Tree", "UNet"]
+
+        if values["-CONTINUOUS-"]:
+            names_combo = ["Decision Tree", "UNet"]
+
+        window["-METHOD-"].update(values=names_combo, value=values["-METHOD-"])
 
         if event == "-FILE_BF-":
             file_path = values["-FILE_BF-"]
@@ -42,14 +70,15 @@ def main() -> None:
             brightfield_bytes = cv2.imencode(".png", brightfield)[1].tobytes()
             window["-IMAGE_BF-"].update(data=brightfield_bytes)
 
-        if values["-MASK-"]:
-            # Apply method to estimate the dye image
-            _, dye = cv2.threshold(
-                brightfield, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
-            )
+        if event == "Convert":
+            if values["-MASK-"]:
+                # Apply method to estimate the dye image
+                _, dye = cv2.threshold(
+                    brightfield, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
+                )
 
-            dye_btyes = cv2.imencode(".png", dye)[1].tobytes()
-            window["-IMAGE_DYE-"].update(data=dye_btyes)
+                dye_btyes = cv2.imencode(".png", dye)[1].tobytes()
+                window["-IMAGE_DYE-"].update(data=dye_btyes)
 
 
 if __name__ == "__main__":
