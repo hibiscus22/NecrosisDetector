@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 import cv2
 import numpy as np
+from functions_masks import *
 
 
 def window_setup(names) -> list:
@@ -85,10 +86,9 @@ def main() -> None:
 
         if event == "Convert":
             if values["-MASK-"]:
-                # Apply method to estimate the dye image
-                _, dye = cv2.threshold(
-                    brightfield, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
-                )
+                # Get and apply the function
+                method = dict_methods[values["-METHOD-"]]
+                dye = method(brightfield)
 
                 dye_btyes = cv2.imencode(".png", dye)[1].tobytes()
                 window["-IMAGE_DYE-"].update(data=dye_btyes)
