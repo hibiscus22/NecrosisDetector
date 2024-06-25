@@ -3,9 +3,9 @@ import numpy as np
 from tools_ML import load_model
 
 
-def otsu_equalize(bf):
+def otsu_equalize(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     # take the negative of the image
-    bf_neg = 255 - bf
+    bf_neg = 255 - img
 
     bf_neg = cv2.GaussianBlur(bf_neg, (5, 5), 0)
 
@@ -25,9 +25,9 @@ def otsu_equalize(bf):
     return bf_final
 
 
-def watershed(bf):
+def watershed(img: np.ndarray, group: str = None, dye: str = None) -> np.ndarray:
 
-    bf_neg = 255 - bf
+    bf_neg = 255 - img
     (T, threshInv) = cv2.threshold(bf_neg, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     # threshInv = cv2.bitwise_and(img[i], img[i], mask=threshInv)
 
@@ -65,24 +65,23 @@ def watershed(bf):
     return res
 
 
-def kmeans(bf, K=2):
+def kmeans(img: np.ndarray, K: int = 2) -> np.ndarray:
     # take the negative of the image
     # bf_neg = 255 - bf
-    bf_neg = bf
 
-    z = np.float32(bf_neg.reshape((-1, 1)))
+    z = np.float32(img.reshape((-1, 1)))
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0)
     _, labels, center = cv2.kmeans(z, K, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS)
     center = np.uint8(center)
     res = center[labels.flatten()]
-    bf_final = res.reshape((bf_neg.shape))
+    bf_final = res.reshape((img.shape))
 
     # bf_final = cv2.threshold(bf_final, 150, 255, cv2.THRESH_BINARY)[1]
 
     return bf_final
 
 
-def water_means(img: np.ndarray) -> np.ndarray:
+def water_means(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     w = watershed(img).astype(np.uint8)
     wi = cv2.bitwise_and(255 - img, 255 - img, mask=w)
     ki = kmeans(wi, K=3)
@@ -105,4 +104,9 @@ dict_methods = {
     "Logistic Regression": None,
     "Decision Tree": decision_tree,
     "UNet": None,
+}
+
+dict_dyes = {
+    "PI": "pi",
+    "DAPI": "dapi",
 }
