@@ -22,16 +22,16 @@ def window_setup(names) -> list:
             sg.Radio("PI", "Dye", size=(10, 2), key="-PI-", default=True),
             sg.Radio("DAPI", "Dye", size=(10, 2), key="-DAPI-"),
         ],
+        # Another dummy but for the save
         [sg.Input(key="-FILE_DYE-", enable_events=True, visible=False)],
         [sg.FileSaveAs(target="-FILE_DYE-", file_types=(("PNG", "*.png"),))],
     ]
 
-    layout = [
+    mode_selector = [
         [
-            sg.Column(image_viewer_brightfield),
-            # sg.VSeparator(),
-            sg.Button("Convert"),
-            sg.Column(image_viewer_stain),
+            sg.Radio("CRC", "Cell line", size=(10, 2), key="-CRC-"),
+            sg.Radio("Pancreas", "Cell line", size=(10, 2), key="-PANCREAS-"),
+            sg.Radio("Generic", "Cell line", size=(10, 2), key="-BOTH-", default=True),
         ],
         [
             sg.Radio("Binary Masks", "Solution", size=(10, 2), key="-MASK-"),
@@ -41,6 +41,16 @@ def window_setup(names) -> list:
             ),
         ],
         [sg.Combo(names, enable_events=True, key="-METHOD-")],
+    ]
+
+    layout = [
+        [
+            sg.Column(image_viewer_brightfield),
+            # sg.VSeparator(),
+            sg.Button("Convert"),
+            sg.Column(image_viewer_stain),
+        ],
+        mode_selector,
     ]
 
     return layout
@@ -56,6 +66,11 @@ def main() -> None:
 
         event, values = window.read(timeout=20)
 
+        if values["-PI-"]:
+            dye = "pi"
+        else:
+            dye = "dapi"
+
         if event == sg.WIN_CLOSED:
             break
 
@@ -65,7 +80,7 @@ def main() -> None:
                 "Watershed",
                 "Watershed + KMeans",
                 "Logistic Regression",
-                "Decission Tree",
+                "Decision Tree",
                 "UNet",
             ]
 
@@ -88,18 +103,15 @@ def main() -> None:
 
         if event == "-FILE_DYE-":  # Save
             file_path = values["-FILE_DYE-"]
-            print(file_path)
-            cv2.imwrite(file_path, dye)
+            cv2.imwrite(file_path, dye_image)
 
         if event == "Convert":
             if values["-MASK-"]:
                 # Get and apply the function
                 method = dict_methods[values["-METHOD-"]]
-                dye = method(brightfield)
+                dye_image = method(brightfield, "ht29", dye)
 
-                dye_btyes = cv2.imencode(".png", dye)[
-                    1
-                ].tobytes()  # png for pysimplegui
+                dye_btyes = cv2.imencode(".png", dye_image)[1].tobytes()  # png format
                 window["-IMAGE_DYE-"].update(data=dye_btyes)
 
             elif values["-MASK3-"]:
