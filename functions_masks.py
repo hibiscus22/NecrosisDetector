@@ -97,6 +97,29 @@ def decision_tree(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     return (img_pred_flat.reshape(256, 256) > 0.5) * 255
 
 
+def decision_tree_3(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    model_background = load_model(
+        f"ModelsML/ternary_dt_classifier_{group}_{dye}_background.pkl"
+    )
+    model_foreground = load_model(
+        f"ModelsML/ternary_dt_classifier_{group}_{dye}_foreground.pkl"
+    )
+
+    flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
+    background_pred = model_background.predict_proba(flat_negative_img)[::, 1].reshape(
+        256, 256
+    )
+    foreground_pred = model_foreground.predict_proba(flat_negative_img)[::, 1].reshape(
+        256, 256
+    )
+
+    img_pred = np.zeros((256, 256))
+    img_pred[background_pred > 0.5] = 1
+    img_pred[foreground_pred > 0.3] = 2
+
+    return img_pred * 127
+
+
 def logistic_regression(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     model = load_model(f"ModelsML/binary_lr_classifier_{group}_{dye}.pkl")
 
@@ -106,12 +129,41 @@ def logistic_regression(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     return (img_pred_flat.reshape(256, 256) > 0.5) * 255
 
 
+def logistic_regression_3(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    model_background = load_model(
+        f"ModelsML/ternary_lr_classifier_{group}_{dye}_background.pkl"
+    )
+    model_foreground = load_model(
+        f"ModelsML/ternary_lr_classifier_{group}_{dye}_foreground.pkl"
+    )
+
+    flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
+    background_pred = model_background.predict_proba(flat_negative_img)[::, 1].reshape(
+        256, 256
+    )
+    foreground_pred = model_foreground.predict_proba(flat_negative_img)[::, 1].reshape(
+        256, 256
+    )
+
+    img_pred = np.zeros((256, 256))
+    img_pred[background_pred > 0.2] = 1
+    img_pred[foreground_pred > 0.5] = 2
+
+    return img_pred * 127
+
+
 dict_methods = {
     "Otsu": otsu_equalize,
     "Watershed": watershed,
     "Watershed + KMeans": water_means,
     "Logistic Regression": logistic_regression,
     "Decision Tree": decision_tree,
+    "UNet": None,
+}
+
+dict_methods_3 = {
+    "Logistic Regression": logistic_regression_3,
+    "Decision Tree": decision_tree_3,
     "UNet": None,
 }
 
