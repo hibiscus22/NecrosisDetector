@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from tools_ML import load_model
 
 
 def otsu_equalize(bf):
@@ -71,9 +72,7 @@ def kmeans(bf, K=2):
 
     z = np.float32(bf_neg.reshape((-1, 1)))
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0)
-    compactness, labels, center = cv2.kmeans(
-        z, K, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS
-    )
+    _, labels, center = cv2.kmeans(z, K, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS)
     center = np.uint8(center)
     res = center[labels.flatten()]
     bf_final = res.reshape((bf_neg.shape))
@@ -83,11 +82,20 @@ def kmeans(bf, K=2):
     return bf_final
 
 
-def water_means(img):
+def water_means(img: np.ndarray) -> np.ndarray:
     w = watershed(img).astype(np.uint8)
     wi = cv2.bitwise_and(255 - img, 255 - img, mask=w)
     ki = kmeans(wi, K=3)
     return 255 * (ki == np.max(ki))
+
+
+def decision_tree(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    model = load_model(f"ModelsML/binary_dt_classifier_{group}_{dye}.pkl")
+
+    flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
+    img_pred_flat = model.predict_proba(flat_negative_img)[::, 1]
+
+    return (img_pred_flat.reshape(256, 256) > 0.5) * 255
 
 
 dict_methods = {
@@ -95,6 +103,6 @@ dict_methods = {
     "Watershed": watershed,
     "Watershed + KMeans": water_means,
     "Logistic Regression": None,
-    "Decision Tree": None,
+    "Decision Tree": decision_tree,
     "UNet": None,
 }
