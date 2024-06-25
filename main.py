@@ -1,6 +1,5 @@
 import PySimpleGUI as sg
 import cv2
-import numpy as np
 from functions_masks import *
 from gui_setup import window_setup
 

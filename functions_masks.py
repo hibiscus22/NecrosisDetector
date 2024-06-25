@@ -97,11 +97,20 @@ def decision_tree(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     return (img_pred_flat.reshape(256, 256) > 0.5) * 255
 
 
+def logistic_regression(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    model = load_model(f"ModelsML/binary_lr_classifier_{group}_{dye}.pkl")
+
+    flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
+    img_pred_flat = model.predict_proba(flat_negative_img)[::, 1]
+
+    return (img_pred_flat.reshape(256, 256) > 0.5) * 255
+
+
 dict_methods = {
     "Otsu": otsu_equalize,
     "Watershed": watershed,
     "Watershed + KMeans": water_means,
-    "Logistic Regression": None,
+    "Logistic Regression": logistic_regression,
     "Decision Tree": decision_tree,
     "UNet": None,
 }
