@@ -97,6 +97,15 @@ def decision_tree(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     return (img_pred_flat.reshape(256, 256) > 0.5) * 255
 
 
+def decision_tree_regressor(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    model = load_model(f"ModelsML/dt_regressor_{group}_{dye}.pkl")
+
+    flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
+    img_pred_flat = model.predict(flat_negative_img)
+
+    return (img_pred_flat.reshape(256, 256)) * 255
+
+
 def decision_tree_3(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     model_background = load_model(
         f"ModelsML/ternary_dt_classifier_{group}_{dye}_background.pkl"
@@ -166,6 +175,12 @@ dict_methods_3 = {
     "Decision Tree": decision_tree_3,
     "UNet": None,
 }
+
+dict_continuous = {
+    "Decision Tree": decision_tree_regressor,
+    "UNet": None,
+}
+
 
 dict_dyes = {
     "PI": "pi",

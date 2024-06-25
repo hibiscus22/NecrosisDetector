@@ -64,18 +64,17 @@ def main() -> None:
                 if values["-MASK-"]:
                     # Get and apply the function
                     method = dict_methods[values["-METHOD-"]]
-                    dye_image = method(brightfield, group, dye)
 
                 elif values["-MASK3-"]:
                     method = dict_methods_3[values["-METHOD-"]]
-                    dye_image = method(brightfield, group, dye)
 
                 elif values["-CONTINUOUS-"]:
-                    pass
+                    method = dict_continuous[values["-METHOD-"]]
 
                 else:
                     break
 
+                dye_image = method(brightfield, group, dye)
                 dye_btyes = cv2.imencode(".png", dye_image)[1].tobytes()  # png format
                 window["-IMAGE_DYE-"].update(data=dye_btyes)
 
