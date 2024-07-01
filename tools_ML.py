@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import os
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 import pickle
 
 
