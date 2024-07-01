@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from tools_ML import load_model
+from tensorflow.keras import models
 
 
 def otsu_equalize(img: np.ndarray, group: str, dye: str) -> np.ndarray:
@@ -161,24 +162,55 @@ def logistic_regression_3(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     return img_pred * 127
 
 
+def binary_unet(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    img = 1 - img / 255.0
+    img = np.expand_dims(img, axis=0)
+    model = models.load_model(f"ModelsDL/unet/unet_{group}_{dye}.keras")
+    img_pred = model.predict(img)
+    return img_pred[0] * 255
+
+
+def ternary_unet(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    img = 1 - img / 255.0
+    img = np.expand_dims(img, axis=0)
+    model = models.load_model(f"ModelsDL/unet/unet_ternary_{group}_{dye}.keras")
+    img_pred = model.predict(img)
+
+    background = img_pred[0, :, :, 0]
+    foreground = img_pred[0, :, :, 1]
+
+    return background * 127 + foreground * 255
+
+
+def continuous_unet(img: np.ndarray, group: str, dye: str) -> np.ndarray:
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    img = 1 - img / 255.0
+    img = np.expand_dims(img, axis=0)
+    model = models.load_model(f"ModelsDL/Cont_unet/continuous_unet_{group}_{dye}.keras")
+    img_pred = model.predict(img)
+    return img_pred[0] * 255
+
+
 dict_methods = {
     "Otsu": otsu_equalize,
     "Watershed": watershed,
     "Watershed + KMeans": water_means,
     "Logistic Regression": logistic_regression,
     "Decision Tree": decision_tree,
-    "UNet": None,
+    "UNet": binary_unet,
 }
 
 dict_methods_3 = {
     "Logistic Regression": logistic_regression_3,
     "Decision Tree": decision_tree_3,
-    "UNet": None,
+    "UNet": ternary_unet,
 }
 
 dict_continuous = {
     "Decision Tree": decision_tree_regressor,
-    "UNet": None,
+    "UNet": continuous_unet,
 }
 
 
