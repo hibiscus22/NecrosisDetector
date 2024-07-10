@@ -1,4 +1,7 @@
 ModelsDL/
 ModelsML/
 __pycache__/
+dist/
+build/
+main.spec
 NecrosisDetector

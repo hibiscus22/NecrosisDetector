@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-from tools_ML import load_model
-from tensorflow.keras import models
+from tools_ML import load_model as load_pickle
+from keras.models import Model, load_model
 
 
 def otsu_equalize(img: np.ndarray, group: str, dye: str) -> np.ndarray:
@@ -90,7 +90,7 @@ def water_means(img: np.ndarray, group: str, dye: str) -> np.ndarray:
 
 
 def decision_tree(img: np.ndarray, group: str, dye: str) -> np.ndarray:
-    model = load_model(f"ModelsML/binary_dt_classifier_{group}_{dye}.pkl")
+    model = load_pickle(f"ModelsML/binary_dt_classifier_{group}_{dye}.pkl")
 
     flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
     img_pred_flat = model.predict_proba(flat_negative_img)[::, 1]
@@ -99,7 +99,7 @@ def decision_tree(img: np.ndarray, group: str, dye: str) -> np.ndarray:
 
 
 def decision_tree_regressor(img: np.ndarray, group: str, dye: str) -> np.ndarray:
-    model = load_model(f"ModelsML/dt_regressor_{group}_{dye}.pkl")
+    model = load_pickle(f"ModelsML/dt_regressor_{group}_{dye}.pkl")
 
     flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
     img_pred_flat = model.predict(flat_negative_img)
@@ -108,10 +108,10 @@ def decision_tree_regressor(img: np.ndarray, group: str, dye: str) -> np.ndarray
 
 
 def decision_tree_3(img: np.ndarray, group: str, dye: str) -> np.ndarray:
-    model_background = load_model(
+    model_background = load_pickle(
         f"ModelsML/ternary_dt_classifier_{group}_{dye}_background.pkl"
     )
-    model_foreground = load_model(
+    model_foreground = load_pickle(
         f"ModelsML/ternary_dt_classifier_{group}_{dye}_foreground.pkl"
     )
 
@@ -131,7 +131,7 @@ def decision_tree_3(img: np.ndarray, group: str, dye: str) -> np.ndarray:
 
 
 def logistic_regression(img: np.ndarray, group: str, dye: str) -> np.ndarray:
-    model = load_model(f"ModelsML/binary_lr_classifier_{group}_{dye}.pkl")
+    model = load_pickle(f"ModelsML/binary_lr_classifier_{group}_{dye}.pkl")
 
     flat_negative_img = np.float32((255 - img.reshape((-1, 1)))) / 255
     img_pred_flat = model.predict_proba(flat_negative_img)[::, 1]
@@ -140,10 +140,10 @@ def logistic_regression(img: np.ndarray, group: str, dye: str) -> np.ndarray:
 
 
 def logistic_regression_3(img: np.ndarray, group: str, dye: str) -> np.ndarray:
-    model_background = load_model(
+    model_background = load_pickle(
         f"ModelsML/ternary_lr_classifier_{group}_{dye}_background.pkl"
     )
-    model_foreground = load_model(
+    model_foreground = load_pickle(
         f"ModelsML/ternary_lr_classifier_{group}_{dye}_foreground.pkl"
     )
 
@@ -166,7 +166,7 @@ def binary_unet(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     img = 1 - img / 255.0
     img = np.expand_dims(img, axis=0)
-    model = models.load_model(f"ModelsDL/unet/unet_{group}_{dye}.keras")
+    model = load_model(f"ModelsDL/unet/unet_{group}_{dye}.h5")
     img_pred = model.predict(img)
     return img_pred[0] * 255
 
@@ -175,7 +175,7 @@ def ternary_unet(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     img = 1 - img / 255.0
     img = np.expand_dims(img, axis=0)
-    model = models.load_model(f"ModelsDL/unet/unet_ternary_{group}_{dye}.keras")
+    model = load_model(f"ModelsDL/unet/unet_ternary_{group}_{dye}.h5")
     img_pred = model.predict(img)
 
     background = img_pred[0, :, :, 0]
@@ -188,7 +188,7 @@ def continuous_unet(img: np.ndarray, group: str, dye: str) -> np.ndarray:
     img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     img = 1 - img / 255.0
     img = np.expand_dims(img, axis=0)
-    model = models.load_model(f"ModelsDL/Cont_unet/continuous_unet_{group}_{dye}.keras")
+    model = load_model(f"ModelsDL/Cont_unet/cont_unet_{group}_{dye}.h5")
     img_pred = model.predict(img)
     return img_pred[0] * 255
 
