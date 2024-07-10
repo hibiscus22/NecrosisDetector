@@ -40,6 +40,8 @@ def main() -> None:
                 ]
 
             if values["-MASK3-"]:
+                window["-DAPI-"].update(visible=False)
+                values["-PI-"] = True
                 names_combo = ["Logistic Regression", "Decision Tree", "UNet"]
 
             if values["-CONTINUOUS-"]:
