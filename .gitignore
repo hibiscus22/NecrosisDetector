@@ -3,6 +3,6 @@ __pycache__/
 dist/
 build/
 main.spec
-main.py
+main.exe
 NecrosisDetector
 pysimplegui_license.txt
