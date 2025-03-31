@@ -1,7 +1,8 @@
 ModelsDL/
-ModelsML/
 __pycache__/
 dist/
 build/
 main.spec
+main.py
 NecrosisDetector
+pysimplegui_license.txt
