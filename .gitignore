@@ -6,3 +6,4 @@ main.spec
 main.exe
 NecrosisDetector
 pysimplegui_license.txt
+.venv*
